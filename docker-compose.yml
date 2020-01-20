@@ -1,3 +1,17 @@
+cfssl:
+  restart: always
+  # entrypoint: ["sh", "-c", "sleep 204728384" ]
+  build: ./cfssl
+  expose:
+    - "8000"
+    - "8888"
+    - "8889"
+  links:
+    - postgres:postgres
+  volumes:
+    - /root/infra/apt-miss.com:/root/infra
+  environment:
+    DEBUG: 'False'
 lemur-web:
   restart: always
   build: ./web
@@ -5,11 +19,14 @@ lemur-web:
     - "8000"
   links:
     - postgres:postgres
+    - cfssl:cfssl
   volumes:
+	# lets nginx use static lemur content
     - /usr/local/src/lemur/lemur/static/dist
   environment:
     DEBUG: 'False'
     LEMUR_CONF: /usr/local/src/lemur/lemur.conf.py
+    LEMUR_TARGET: release
 lemur-nginx:
   restart: always
   build: ./nginx/
